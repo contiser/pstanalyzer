@@ -90,10 +90,10 @@ def lookForRecipient(receivedItems):
 
 
 def getRecipient(message):
-        recipients = re.findall("To: \S+@\S+.+\S+", message.transport_headers)
-        for recipient in range(0, len(recipients)):
-            recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
-        return recipients
+    recipients = re.findall("To: \S+@\S+.+\S+", message.transport_headers)
+    for recipient in range(0, len(recipients)):
+        recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
+    return recipients
 
 
 def getMaxRecipient(recipients):
@@ -119,7 +119,7 @@ except AttributeError:
         recipients = lookForRecipient(receivedItems)
         getMaxRecipient(recipients)
 
-# If it happens again, then there were no folder we could analyze
+    # If it happens again, then there were no folder we could analyze
     except AttributeError:
         print("Sorry, there were no folders I could analyze :-(")
 # !!! Very important never forget to close the file!
