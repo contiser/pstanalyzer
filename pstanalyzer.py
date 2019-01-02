@@ -6,6 +6,7 @@
 import sys
 import pypff
 import operator
+import re
 
 
 def openPST():
@@ -71,17 +72,32 @@ def lookForSender(sentItems):
 
 
 def getMaxSender(senders):
-    print('Utente', max(senders.items(), key=operator.itemgetter(1))[0], 'percentuale: ' \
+    print('Data from sent Emails, User: ', max(senders.items(), key=operator.itemgetter(1))[0], 'Percentage: ' \
           , max(senders.items(), key=operator.itemgetter(1))[1] / sentItems.get_number_of_sub_messages() * 100, '%')
 
 
 def lookForRecipient(receivedItems):
     recipients = dict()
-    for message in range(0, sentItems.get_number_of_sub_messages()):
-        recipients[receivedItems.get_sub_message(message).get_sender_name()] = \
-            recipients[receivedItems.get_sub_message(message).get_sender_name()] + 1
-
+    for message in range(0, receivedItems.get_number_of_sub_messages()):
+        users = getRecipient(receivedItems.get_sub_message(message))
+        for user in range(0, len(users)):
+            actualUser = users[user]
+            if actualUser in recipients:
+                recipients[actualUser] = recipients[actualUser] + 1
+            else:
+                recipients[actualUser] = 1
     return recipients
+
+
+def getRecipient(message):
+        recipients = re.findall("To: \S+@\S+.+\S+", message.transport_headers)
+        for recipient in range(0, len(recipients)):
+            recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
+        return recipients
+
+
+def getMaxRecipient(recipients):
+    print('Data from received Emails, User:', max(recipients.items(), key=operator.itemgetter(1))[0])
 
 
 # End of function definitions
@@ -89,10 +105,22 @@ def lookForRecipient(receivedItems):
 
 pstfile = openPST()
 folders = parseFolders(pstfile)
-sentItems = parseSentItems(folders)
-receivedItems = parseReceivedItems(folders)
-senders = lookForSender(sentItems)
-getMaxSender(senders)
 
+# Normal run, try to work just with the sent Emails
+try:
+    sentItems = parseSentItems(folders)
+    receivedItems = parseReceivedItems(folders)
+    senders = lookForSender(sentItems)
+    getMaxSender(senders)
+
+# If it goes wrong then try with the inbox Items
+except AttributeError:
+    try:
+        recipients = lookForRecipient(receivedItems)
+        getMaxRecipient(recipients)
+
+# If it happens again, then there were no folder we could analyze
+    except AttributeError:
+        print("Sorry, there were no folders I could analyze :-(")
 # !!! Very important never forget to close the file!
 pstfile.close()
