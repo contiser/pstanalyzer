@@ -47,7 +47,9 @@ def parseSentItems(folders):
     for folder in range(0, len(folders)):
         print('Parsing for Sent Items:' + folders[folder].get_name())
         if (folders[folder].get_name() == "Posta inviata") or (folders[folder].get_name() == "Posta Inviata") \
-                or (folders[folder].get_name() == "Sent items") or (folders[folder].get_name() == "Sent Items"):
+                or (folders[folder].get_name() == "Sent items") or (folders[folder].get_name() == "Sent Items") \
+                or (folders[folder].get_name() == "Gesendete Elemente") or (
+                folders[folder].get_name() == "Messages envoyés"):
             return folders[folder]
 
 
@@ -56,7 +58,10 @@ def parseReceivedItems(folders):
 
     for folder in range(0, len(folders)):
         print('Parsing for inbox:' + folders[folder].get_name())
-        if (folders[folder].get_name() == "Posta in arrivo") or (folders[folder].get_name() == "Inbox"):
+        if (folders[folder].get_name() == "Posta in arrivo") or (folders[folder].get_name() == "Inbox") or \
+                (folders[folder].get_name() == "Inbox") \
+                or (folders[folder].get_name() == "Boîte de réception") or (
+                folders[folder].get_name() == "Posteingang"):
             return folders[folder]
 
 
