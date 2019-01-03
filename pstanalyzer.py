@@ -45,7 +45,7 @@ def parseFolders(pstfile):
 def parseSentItems(folders):
     # Let's check if we're lucky, there should be a sent items folder to calculate statistics on the 'sent from' field
     for folder in range(0, len(folders)):
-        print('Parsing for Sent Items:' + folders[folder].get_name())
+        # print('Parsing for Sent Items:' + folders[folder].get_name())
         if (folders[folder].get_name() == "Posta inviata") or (folders[folder].get_name() == "Posta Inviata") \
                 or (folders[folder].get_name() == "Sent items") or (folders[folder].get_name() == "Sent Items") \
                 or (folders[folder].get_name() == "Gesendete Elemente") or (
@@ -57,7 +57,7 @@ def parseReceivedItems(folders):
     # If we weren't lucky, well... let's try to do the inverse with the inbox and the 'recipient' field
 
     for folder in range(0, len(folders)):
-        print('Parsing for inbox:' + folders[folder].get_name())
+        # print('Parsing for inbox:' + folders[folder].get_name())
         if (folders[folder].get_name() == "Posta in arrivo") or (folders[folder].get_name() == "Inbox") or \
                 (folders[folder].get_name() == "Inbox") \
                 or (folders[folder].get_name() == "Boîte de réception") or (
@@ -77,8 +77,12 @@ def lookForSender(sentItems):
 
 
 def getMaxSender(senders):
-    print('Data from sent Emails, User: ', max(senders.items(), key=operator.itemgetter(1))[0], 'Percentage: ' \
-          , max(senders.items(), key=operator.itemgetter(1))[1] / sentItems.get_number_of_sub_messages() * 100, '%')
+    # Old code debugging printing from where the data comes from
+    # print('Data from sent Emails, User: ', max(senders.items(), key=operator.itemgetter(1))[0],\
+    # 'Percentage: ' max(senders.items(), key=operator.itemgetter(1))[1]\
+    # / sentItems.get_number_of_sub_messages() * 100, '%')
+    print(max(senders.items(), key=operator.itemgetter(1))[0], '-',
+          max(senders.items(), key=operator.itemgetter(1))[1] / sentItems.get_number_of_sub_messages() * 100, '%')
 
 
 def lookForRecipient(receivedItems):
@@ -95,14 +99,17 @@ def lookForRecipient(receivedItems):
 
 
 def getRecipient(message):
-    recipients = re.findall("To: \S+@\S+.+\S+", message.transport_headers)
+    recipients = re.findall("To: \S+\D*@\S+.+\S+", message.transport_headers)
     for recipient in range(0, len(recipients)):
         recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
     return recipients
 
 
 def getMaxRecipient(recipients):
-    print('Data from received Emails, User:', max(recipients.items(), key=operator.itemgetter(1))[0])
+    # Old code debugging printing from where the data comes from
+    # print('Data from received Emails, User:', max(recipients.items(), key=operator.itemgetter(1))[0])\
+    # , max(recipients.items(), key=operator.itemgetter(1))[0])
+    print(max(recipients.items(), key=operator.itemgetter(1))[0])
 
 
 # End of function definitions
