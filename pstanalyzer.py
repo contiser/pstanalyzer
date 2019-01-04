@@ -12,7 +12,7 @@ import re
 def openPST():
     pstfile = pypff.file()
 
-    # Check that the pst file path was provided otherwise exiting
+    # Check that the pst file path was provided otherwise exit
 
     if len(sys.argv) != 2:
         print("Please enter the path of the file you want to analyze!")
@@ -66,13 +66,15 @@ def parseReceivedItems(folders):
 
 
 def lookForSender(sentItems):
-    senders = dict()
     for message in range(0, sentItems.get_number_of_sub_messages()):
         if sentItems.get_sub_message(message).get_sender_name() in senders:
             senders[sentItems.get_sub_message(message).get_sender_name()] = \
                 senders[sentItems.get_sub_message(message).get_sender_name()] + 1
         else:
             senders[sentItems.get_sub_message(message).get_sender_name()] = 1
+
+    for folder in range(0, sentItems.get_number_of_sub_folders()):
+        lookForRecipient(sentItems.get_sub_folder(folder))
     return senders
 
 
@@ -86,7 +88,6 @@ def getMaxSender(senders):
 
 
 def lookForRecipient(receivedItems):
-    recipients = dict()
     for message in range(0, receivedItems.get_number_of_sub_messages()):
         users = getRecipient(receivedItems.get_sub_message(message))
         for user in range(0, len(users)):
@@ -95,11 +96,14 @@ def lookForRecipient(receivedItems):
                 recipients[actualUser] = recipients[actualUser] + 1
             else:
                 recipients[actualUser] = 1
+
+    for folder in range(0, receivedItems.get_number_of_sub_folders()):
+        lookForRecipient(receivedItems.get_sub_folder(folder))
     return recipients
 
 
 def getRecipient(message):
-    recipients = re.findall("To: \S+\D*@\S+.+\S+", message.transport_headers)
+    recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
     for recipient in range(0, len(recipients)):
         recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
     return recipients
@@ -109,7 +113,8 @@ def getMaxRecipient(recipients):
     # Old code debugging printing from where the data comes from
     # print('Data from received Emails, User:', max(recipients.items(), key=operator.itemgetter(1))[0])\
     # , max(recipients.items(), key=operator.itemgetter(1))[0])
-    print(max(recipients.items(), key=operator.itemgetter(1))[0])
+    maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
+    print(maxRecipient[len(maxRecipient)-1])
 
 
 # End of function definitions
@@ -120,19 +125,21 @@ folders = parseFolders(pstfile)
 
 # Normal run, try to work just with the sent Emails
 try:
+    senders = dict()
     sentItems = parseSentItems(folders)
-    receivedItems = parseReceivedItems(folders)
     senders = lookForSender(sentItems)
     getMaxSender(senders)
 
 # If it goes wrong then try with the inbox Items
-except AttributeError:
+except (AttributeError, ValueError):
     try:
+        recipients = dict()
+        receivedItems = parseReceivedItems(folders)
         recipients = lookForRecipient(receivedItems)
         getMaxRecipient(recipients)
 
     # If it happens again, then there were no folder we could analyze
-    except AttributeError:
+    except (AttributeError, ValueError):
         print("Sorry, there were no folders I could analyze :-(")
 # !!! Very important never forget to close the file!
 pstfile.close()
