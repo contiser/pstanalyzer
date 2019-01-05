@@ -103,7 +103,10 @@ def lookForRecipient(receivedItems):
 
 
 def getRecipient(message):
-    recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
+    try:
+        recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
+    except TypeError:
+        return dict()
     for recipient in range(0, len(recipients)):
         recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
     return recipients
