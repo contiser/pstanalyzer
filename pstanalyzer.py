@@ -75,7 +75,6 @@ def lookForSender(sentItems):
 
     for folder in range(0, sentItems.get_number_of_sub_folders()):
         lookForRecipient(sentItems.get_sub_folder(folder))
-    return senders
 
 
 def getMaxSender(senders):
@@ -99,7 +98,6 @@ def lookForRecipient(receivedItems):
 
     for folder in range(0, receivedItems.get_number_of_sub_folders()):
         lookForRecipient(receivedItems.get_sub_folder(folder))
-    return recipients
 
 
 def getRecipient(message):
@@ -130,7 +128,7 @@ folders = parseFolders(pstfile)
 try:
     senders = dict()
     sentItems = parseSentItems(folders)
-    senders = lookForSender(sentItems)
+    lookForSender(sentItems)
     getMaxSender(senders)
 
 # If it goes wrong then try with the inbox Items
@@ -138,7 +136,7 @@ except (AttributeError, ValueError):
     try:
         recipients = dict()
         receivedItems = parseReceivedItems(folders)
-        recipients = lookForRecipient(receivedItems)
+        lookForRecipient(receivedItems)
         getMaxRecipient(recipients)
 
     # If it happens again, then there were no folder we could analyze
