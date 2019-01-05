@@ -65,16 +65,17 @@ def parseReceivedItems(folders):
             return folders[folder]
 
 
-def lookForSender(self, sentItems):
+def lookForSender(sentItems):
     for message in range(0, sentItems.get_number_of_sub_messages()):
         if sentItems.get_sub_message(message).get_sender_name() in senders:
-            self.senders[sentItems.get_sub_message(message).get_sender_name()] = \
-                self.senders[sentItems.get_sub_message(message).get_sender_name()] + 1
+            senders[sentItems.get_sub_message(message).get_sender_name()] = \
+                senders[sentItems.get_sub_message(message).get_sender_name()] + 1
         else:
-            self.senders[sentItems.get_sub_message(message).get_sender_name()] = 1
+            senders[sentItems.get_sub_message(message).get_sender_name()] = 1
 
     for folder in range(0, sentItems.get_number_of_sub_folders()):
         lookForRecipient(sentItems.get_sub_folder(folder))
+    return senders
 
 
 def getMaxSender(senders):
@@ -98,15 +99,13 @@ def lookForRecipient(receivedItems):
 
     for folder in range(0, receivedItems.get_number_of_sub_folders()):
         lookForRecipient(receivedItems.get_sub_folder(folder))
+    return recipients
 
 
-def getRecipient(self, message):
-    try:
-        self.recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
-        for recipient in range(0, len(recipients)):
-            self.recipients[recipient] = self.recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
-    except TypeError:
-        return self.recipients
+def getRecipient(message):
+    recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
+    for recipient in range(0, len(recipients)):
+        recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
     return recipients
 
 
@@ -131,19 +130,19 @@ folders = parseFolders(pstfile)
 try:
     senders = dict()
     sentItems = parseSentItems(folders)
-    lookForSender(sentItems)
+    senders = lookForSender(sentItems)
     getMaxSender(senders)
-
+except (AttributeError, ValueError):
+    print("Error analyzing Sent Items")
 # If it goes wrong then try with the inbox Items
-except (AttributeError, ValueError, TypeError):
-    try:
-        recipients = dict()
-        receivedItems = parseReceivedItems(folders)
-        lookForRecipient(receivedItems)
-        getMaxRecipient(recipients)
+try:
+    recipients = dict()
+    receivedItems = parseReceivedItems(folders)
+    recipients = lookForRecipient(receivedItems)
+    getMaxRecipient(recipients)
 
     # If it happens again, then there were no folder we could analyze
-    except (AttributeError, ValueError, TypeError):
-        print("Sorry, there were no folders I could analyze :-(")
+except (AttributeError, ValueError, TypeError):
+    print("Error analyzing Received Items")
 # !!! Very important never forget to close the file!
 pstfile.close()
