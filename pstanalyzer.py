@@ -88,17 +88,18 @@ def getMaxSender(senders):
 
 
 def lookForRecipient(receivedItems):
-    for message in range(0, receivedItems.get_number_of_sub_messages()):
-        users = getRecipient(receivedItems.get_sub_message(message))
-        for user in range(0, len(users)):
-            actualUser = users[user]
-            if actualUser in recipients:
-                recipients[actualUser] = recipients[actualUser] + 1
-            else:
-                recipients[actualUser] = 1
+    if receivedItems in locals():
+        for message in range(0, receivedItems.get_number_of_sub_messages()):
+            users = getRecipient(receivedItems.get_sub_message(message))
+            for user in range(0, len(users)):
+                actualUser = users[user]
+                if actualUser in recipients:
+                    recipients[actualUser] = recipients[actualUser] + 1
+                else:
+                    recipients[actualUser] = 1
 
-    for folder in range(0, receivedItems.get_number_of_sub_folders()):
-        lookForRecipient(receivedItems.get_sub_folder(folder))
+        for folder in range(0, receivedItems.get_number_of_sub_folders()):
+            lookForRecipient(receivedItems.get_sub_folder(folder))
     return recipients
 
 
@@ -116,8 +117,12 @@ def getMaxRecipient(recipients):
     # Old code debugging printing from where the data comes from
     # print('Data from received Emails, User:', max(recipients.items(), key=operator.itemgetter(1))[0])\
     # , max(recipients.items(), key=operator.itemgetter(1))[0])
-    maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
-    print(maxRecipient[len(maxRecipient)-1])
+    if recipients in locals():
+        if len(recipients)>0:
+            maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
+            print(maxRecipient[len(maxRecipient) - 1])
+    else:
+        print("Couldn't determine the max Recipient")
 
 
 # End of function definitions
