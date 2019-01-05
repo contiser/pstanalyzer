@@ -129,17 +129,17 @@ try:
     sentItems = parseSentItems(folders)
     senders = lookForSender(sentItems)
     getMaxSender(senders)
-
-# If it goes wrong then try with the inbox Items
 except (AttributeError, ValueError):
-    try:
-        recipients = dict()
-        receivedItems = parseReceivedItems(folders)
-        recipients = lookForRecipient(receivedItems)
-        getMaxRecipient(recipients)
+    print("Error analyzing Sent Items")
+# If it goes wrong then try with the inbox Items
+try:
+    recipients = dict()
+    receivedItems = parseReceivedItems(folders)
+    recipients = lookForRecipient(receivedItems)
+    getMaxRecipient(recipients)
 
     # If it happens again, then there were no folder we could analyze
-    except (AttributeError, ValueError):
-        print("Sorry, there were no folders I could analyze :-(")
+except (AttributeError, ValueError, TypeError):
+    print("Error analyzing Received Items")
 # !!! Very important never forget to close the file!
 pstfile.close()
