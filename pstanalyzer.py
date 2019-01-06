@@ -74,7 +74,7 @@ def lookForSender(sentItems):
             senders[sentItems.get_sub_message(message).get_sender_name()] = 1
 
     for folder in range(0, sentItems.get_number_of_sub_folders()):
-        lookForRecipient(sentItems.get_sub_folder(folder))
+        lookForSender(sentItems.get_sub_folder(folder))
 
 
 def getMaxSender(senders):
@@ -82,8 +82,11 @@ def getMaxSender(senders):
     # print('Data from sent Emails, User: ', max(senders.items(), key=operator.itemgetter(1))[0],\
     # 'Percentage: ' max(senders.items(), key=operator.itemgetter(1))[1]\
     # / sentItems.get_number_of_sub_messages() * 100, '%')
-    print(max(senders.items(), key=operator.itemgetter(1))[0], '-',
+    if sentItems.get_number_of_sub_messages() != 0:
+        print(max(senders.items(), key=operator.itemgetter(1))[0], '-',
           max(senders.items(), key=operator.itemgetter(1))[1] / sentItems.get_number_of_sub_messages() * 100, '%')
+    else:
+        print(max(senders.items(), key=operator.itemgetter(1))[0])
 
 
 def lookForRecipient(receivedItems):
