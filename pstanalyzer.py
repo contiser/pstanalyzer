@@ -15,14 +15,14 @@ def openPST():
     # Check that the pst file path was provided otherwise exit
 
     if len(sys.argv) != 2:
-        print("Please enter the path of the file you want to analyze!")
+        print("101 Please enter the path of the file you want to analyze!")
         exit(1)
     else:
         try:
             pstfile.open(sys.argv[1])
 
         except OSError:
-            print("An error has occurred while trying to open the file, exiting...")
+            print("102 An error has occurred while trying to open the file, exiting...")
             exit(1)
 
     return pstfile
@@ -121,7 +121,7 @@ def getMaxRecipient(recipients):
         maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
         print(maxRecipient[len(maxRecipient) - 1])
     else:
-        print("Couldn't determine the max Recipient")
+        print("104 Error analyzing Received Items")
 
 
 # End of function definitions
@@ -147,6 +147,6 @@ except (AttributeError, ValueError, TypeError):
 
     # If it happens again, then there were no folder we could analyze
     except (AttributeError, ValueError, TypeError):
-        print("Sorry, there were no folders I could analyze :-(")
+        print("105 Sorry, there were no folders I could analyze :-(")
 # !!! Very important never forget to close the file!
 pstfile.close()
