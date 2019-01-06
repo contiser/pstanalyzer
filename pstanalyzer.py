@@ -65,13 +65,13 @@ def parseReceivedItems(folders):
             return folders[folder]
 
 
-def lookForSender(self, sentItems):
+def lookForSender(sentItems):
     for message in range(0, sentItems.get_number_of_sub_messages()):
         if sentItems.get_sub_message(message).get_sender_name() in senders:
-            self.senders[sentItems.get_sub_message(message).get_sender_name()] = \
-                self.senders[sentItems.get_sub_message(message).get_sender_name()] + 1
+            senders[sentItems.get_sub_message(message).get_sender_name()] = \
+                senders[sentItems.get_sub_message(message).get_sender_name()] + 1
         else:
-            self.senders[sentItems.get_sub_message(message).get_sender_name()] = 1
+            senders[sentItems.get_sub_message(message).get_sender_name()] = 1
 
     for folder in range(0, sentItems.get_number_of_sub_folders()):
         lookForRecipient(sentItems.get_sub_folder(folder))
@@ -100,13 +100,13 @@ def lookForRecipient(receivedItems):
         lookForRecipient(receivedItems.get_sub_folder(folder))
 
 
-def getRecipient(self, message):
+def getRecipient(message):
     try:
-        self.recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
+        recipients = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
         for recipient in range(0, len(recipients)):
-            self.recipients[recipient] = self.recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
+            recipients[recipient] = recipients[recipient].strip("To: ").strip("<").strip(">").strip(" ")
     except TypeError:
-        return self.recipients
+        return recipients
     return recipients
 
 
