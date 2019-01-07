@@ -92,6 +92,7 @@ def getMaxSender(senders):
 
 
 def lookForRecipient(receivedItems):
+    global processedReceivedItems
     for message in range(0, receivedItems.get_number_of_sub_messages()):
         users = getRecipient(receivedItems.get_sub_message(message))
         for user in range(0, len(users)):
@@ -100,18 +101,16 @@ def lookForRecipient(receivedItems):
                 recipients[actualUser] = recipients[actualUser] + 1
             else:
                 recipients[actualUser] = 1
-
+        processedReceivedItems = processedReceivedItems + 1
     for folder in range(0, receivedItems.get_number_of_sub_folders()):
         lookForRecipient(receivedItems.get_sub_folder(folder))
 
 
 def getRecipient(message):
-    global processedReceivedItems
     try:
-        to = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
+        to = re.findall("^To: \S*.*\d*@\S+.+\S+", message.transport_headers, re.MULTILINE)
         for recipient in range(0, len(to)):
             to[recipient] = to[recipient].strip("To: ").strip("<").strip(">").strip(" ").strip("\"").strip(" <")
-            processedReceivedItems = processedReceivedItems + 1
         return to
     except TypeError:
         return []
@@ -124,7 +123,7 @@ def getMaxRecipient(recipients):
     if len(recipients) > 0:
         maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
         if processedReceivedItems > 0:
-            print(maxRecipient[len(maxRecipient) - 1],
+            print(maxRecipient[len(maxRecipient) - 1], '-',
                   max(recipients.items(), key=operator.itemgetter(1))[1] / processedReceivedItems * 100, '%')
         else:
             print(maxRecipient[len(maxRecipient) - 1])
