@@ -101,8 +101,7 @@ def lookForRecipient(receivedItems):
                 recipients[actualUser] = recipients[actualUser] + 1
             else:
                 recipients[actualUser] = 1
-
-    processedReceivedItems = processedReceivedItems + 1
+        processedReceivedItems = processedReceivedItems + 1
     for folder in range(0, receivedItems.get_number_of_sub_folders()):
         lookForRecipient(receivedItems.get_sub_folder(folder))
 
