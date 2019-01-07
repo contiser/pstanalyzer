@@ -126,8 +126,6 @@ def getMaxRecipient(recipients):
         if processedReceivedItems > 0:
             print(maxRecipient[len(maxRecipient) - 1],
                   max(recipients.items(), key=operator.itemgetter(1))[1] / processedReceivedItems * 100, '%')
-            print(processedReceivedItems)
-            print(recipients.items())
         else:
             print(maxRecipient[len(maxRecipient) - 1])
     else:
