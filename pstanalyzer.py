@@ -66,6 +66,7 @@ def parseReceivedItems(folders):
 
 
 def lookForSender(sentItems):
+    global processedSentItems
     for message in range(0, sentItems.get_number_of_sub_messages()):
         if sentItems.get_sub_message(message).get_sender_name() in senders:
             senders[sentItems.get_sub_message(message).get_sender_name()] = \
@@ -73,6 +74,7 @@ def lookForSender(sentItems):
         else:
             senders[sentItems.get_sub_message(message).get_sender_name()] = 1
 
+        processedSentItems = processedSentItems + 1
     for folder in range(0, sentItems.get_number_of_sub_folders()):
         lookForSender(sentItems.get_sub_folder(folder))
 
@@ -82,9 +84,9 @@ def getMaxSender(senders):
     # print('Data from sent Emails, User: ', max(senders.items(), key=operator.itemgetter(1))[0],\
     # 'Percentage: ' max(senders.items(), key=operator.itemgetter(1))[1]\
     # / sentItems.get_number_of_sub_messages() * 100, '%')
-    if sentItems.get_number_of_sub_messages() != 0:
+    if processedSentItems != 0:
         print(max(senders.items(), key=operator.itemgetter(1))[0], '-',
-          max(senders.items(), key=operator.itemgetter(1))[1] / sentItems.get_number_of_sub_messages() * 100, '%')
+              max(senders.items(), key=operator.itemgetter(1))[1] / processedSentItems * 100, '%')
     else:
         print(max(senders.items(), key=operator.itemgetter(1))[0])
 
@@ -104,10 +106,12 @@ def lookForRecipient(receivedItems):
 
 
 def getRecipient(message):
+    global processedReceivedItems
     try:
         to = re.findall("To: \S*.*\d*@\S+.+\S+", message.transport_headers)
         for recipient in range(0, len(to)):
-            to[recipient] = to[recipient].strip("To: ").strip("<").strip(">").strip(" ")
+            to[recipient] = to[recipient].strip("To: ").strip("<").strip(">").strip(" ").strip("\"").strip(" <")
+            processedReceivedItems = processedReceivedItems + 1
         return to
     except TypeError:
         return []
@@ -119,7 +123,13 @@ def getMaxRecipient(recipients):
     # , max(recipients.items(), key=operator.itemgetter(1))[0])
     if len(recipients) > 0:
         maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
-        print(maxRecipient[len(maxRecipient) - 1])
+        if processedReceivedItems > 0:
+            print(maxRecipient[len(maxRecipient) - 1],
+                  max(recipients.items(), key=operator.itemgetter(1))[1] / processedReceivedItems * 100, '%')
+            print(processedReceivedItems)
+            print(recipients.items())
+        else:
+            print(maxRecipient[len(maxRecipient) - 1])
     else:
         print("104 Error analyzing Received Items")
 
@@ -132,6 +142,7 @@ folders = parseFolders(pstfile)
 
 # Normal run, try to work just with the sent Emails
 try:
+    processedSentItems = 0
     senders = dict()
     sentItems = parseSentItems(folders)
     lookForSender(sentItems)
@@ -140,6 +151,7 @@ except (AttributeError, ValueError):
     print("103 Error analyzing Sent Items")
 # If it goes wrong then try with the inbox Items
 try:
+    processedReceivedItems = 0
     recipients = dict()
     receivedItems = parseReceivedItems(folders)
     lookForRecipient(receivedItems)
