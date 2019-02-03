@@ -55,26 +55,27 @@ def parseSentItems(folders):
 
 def parseReceivedItems(folders):
     # If we weren't lucky, well... let's try to do the inverse with the inbox and the 'recipient' field
-
+    foldersToAnalyze = []
     for folder in range(0, len(folders)):
         # print('Parsing for inbox:' + folders[folder].get_name())
-        if (folders[folder].get_name() == "Posta in arrivo") or (folders[folder].get_name() == "Inbox") or \
-                (folders[folder].get_name() == "Inbox") \
-                or (folders[folder].get_name() == "Boîte de réception") or (
-                folders[folder].get_name() == "Posteingang"):
-            return folders[folder]
+        if not (folders[folder].get_name() == "Posta inviata") and not (folders[folder].get_name() == "Posta Inviata") \
+                and not (folders[folder].get_name() == "Sent items") and not (folders[folder].get_name() == "Sent Items") \
+                and not (folders[folder].get_name() == "Gesendete Elemente") and not (
+                folders[folder].get_name() == "Messages envoyés"):
+            foldersToAnalyze.append(folders[folder])
+    return foldersToAnalyze
 
 
 def lookForSender(sentItems):
     global processedSentItems
     for message in range(0, sentItems.get_number_of_sub_messages()):
-        if sentItems.get_sub_message(message).get_sender_name() in senders:
-            senders[sentItems.get_sub_message(message).get_sender_name()] = \
-                senders[sentItems.get_sub_message(message).get_sender_name()] + 1
-        else:
-            senders[sentItems.get_sub_message(message).get_sender_name()] = 1
-
-        processedSentItems = processedSentItems + 1
+        if len(sentItems.get_sub_message(message).get_sender_name())>1:
+            if sentItems.get_sub_message(message).get_sender_name() in senders:
+                senders[sentItems.get_sub_message(message).get_sender_name()] = \
+                    senders[sentItems.get_sub_message(message).get_sender_name()] + 1
+            else:
+                senders[sentItems.get_sub_message(message).get_sender_name()] = 1
+            processedSentItems = processedSentItems + 1
     for folder in range(0, sentItems.get_number_of_sub_folders()):
         lookForSender(sentItems.get_sub_folder(folder))
 
@@ -95,13 +96,14 @@ def lookForRecipient(receivedItems):
     global processedReceivedItems
     for message in range(0, receivedItems.get_number_of_sub_messages()):
         users = getRecipient(receivedItems.get_sub_message(message))
-        for user in range(0, len(users)):
-            actualUser = users[user]
-            if actualUser in recipients:
-                recipients[actualUser] = recipients[actualUser] + 1
-            else:
-                recipients[actualUser] = 1
-        processedReceivedItems = processedReceivedItems + 1
+        if len(users) >=1:
+            for user in range(0, len(users)):
+                actualUser = users[user]
+                if actualUser in recipients:
+                    recipients[actualUser] = recipients[actualUser] + 1
+                else:
+                    recipients[actualUser] = 1
+            processedReceivedItems = processedReceivedItems + 1
     for folder in range(0, receivedItems.get_number_of_sub_folders()):
         lookForRecipient(receivedItems.get_sub_folder(folder))
 
@@ -151,7 +153,8 @@ try:
     processedReceivedItems = 0
     recipients = dict()
     receivedItems = parseReceivedItems(folders)
-    lookForRecipient(receivedItems)
+    for receivedItem in receivedItems:
+        lookForRecipient(receivedItem)
     getMaxRecipient(recipients)
 
     # If it happens again, then there were no folder we could analyze
