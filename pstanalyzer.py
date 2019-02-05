@@ -33,7 +33,7 @@ def parseFolders(pstfile):
     root_folder = pstfile.get_root_folder()
     folders = []
 
-    # @folder: is the array which will contain all 1st and 2nd level folders (more is not planned)
+    # @folder: is the array which will contain all 1st and 2nd level folders
 
     for folder in range(0, root_folder.get_number_of_sub_folders()):
         folders.append(root_folder.get_sub_folder(folder))
@@ -44,9 +44,7 @@ def parseFolders(pstfile):
 
 
 def parseSentItems(folders):
-    # Let's check if we're lucky, there should be a sent items folder to calculate statistics on the 'sent from' field
     for folder in range(0, len(folders)):
-        # print('Parsing for Sent Items:' + folders[folder].get_name())
         if (folders[folder].get_name() == "Posta inviata") or (folders[folder].get_name() == "Posta Inviata") \
                 or (folders[folder].get_name() == "Sent items") or (folders[folder].get_name() == "Sent Items") \
                 or (folders[folder].get_name() == "Sent Messages") \
@@ -56,12 +54,10 @@ def parseSentItems(folders):
 
 
 def parseReceivedItems(folders):
-    # If we weren't lucky, well... let's try to do the inverse with the inbox and the 'recipient' field
     foldersToAnalyze = []
     root_folder = pstfile.get_root_folder()
     isroot = bool
     for folder in range(0, len(folders)):
-        # print('Parsing for inbox:' + folders[folder].get_name())
         for root_subfolder in range(0, root_folder.get_number_of_sub_folders()):
             if folders[folder].get_name() == root_folder.get_sub_folder(root_subfolder).get_name():
                 isroot = 1
@@ -96,10 +92,6 @@ def lookForSender(sentItems):
 
 
 def getMaxSender(senders):
-    # Old code debugging printing from where the data comes from
-    # print('Data from sent Emails, User: ', max(senders.items(), key=operator.itemgetter(1))[0],\
-    # 'Percentage: ' max(senders.items(), key=operator.itemgetter(1))[1]\
-    # / sentItems.get_number_of_sub_messages() * 100, '%')
     if processedSentItems != 0:
         print(max(senders.items(), key=operator.itemgetter(1))[0], '-',
               max(senders.items(), key=operator.itemgetter(1))[1] / processedSentItems * 100, '%')
@@ -134,9 +126,6 @@ def getRecipient(message):
 
 
 def getMaxRecipient(recipients):
-    # Old code debugging printing from where the data comes from
-    # print('Data from received Emails, User:', max(recipients.items(), key=operator.itemgetter(1))[0])\
-    # , max(recipients.items(), key=operator.itemgetter(1))[0])
     if len(recipients) > 0:
         maxRecipient = (max(recipients.items(), key=operator.itemgetter(1))[0]).split("<")
         if processedReceivedItems > 0:
@@ -154,7 +143,7 @@ def getMaxRecipient(recipients):
 pstfile = openPST()
 folders = parseFolders(pstfile)
 
-# Normal run, try to work just with the sent Emails
+# Normal run, try to work with the sent Emails
 try:
     processedSentItems = 0
     senders = dict()
@@ -163,7 +152,8 @@ try:
     getMaxSender(senders)
 except (AttributeError, ValueError):
     print("103 Error analyzing Sent Items")
-# If it goes wrong then try with the inbox Items
+
+# try to analyse received Emails too
 try:
     processedReceivedItems = 0
     recipients = dict()
@@ -172,8 +162,8 @@ try:
         lookForRecipient(receivedItem)
     getMaxRecipient(recipients)
 
-    # If it happens again, then there were no folder we could analyze
 except (AttributeError, ValueError):
     print("104 Error analyzing Received Items")
+
 # !!! Very important never forget to close the file!
 pstfile.close()
